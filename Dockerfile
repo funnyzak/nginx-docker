@@ -22,7 +22,6 @@ RUN set -x && \
   GeoIP GeoIP-devel && \
   yum groupinstall -y 'Development Tools'
 
-
 RUN mkdir -p ${TMP_DIR} 
 # Download sources
 RUN wget "http://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz" -O ${TMP_DIR}/nginx.tar.gz
@@ -92,8 +91,6 @@ RUN mkdir -p /var/log/nginx && mkdir -p /var/cache/nginx && \
     ln -s /usr/lib64/nginx/modules /etc/nginx/modules && \
     rm -rf ${TMP_DIR}
 
-
-
 FROM centos:centos7
 
 LABEL org.label-schema.vendor="potato<silenceace@gmail.com>" \
@@ -130,8 +127,3 @@ WORKDIR /usr/sbin/
 EXPOSE 80 443
 
 CMD ["/usr/sbin/nginx","-g","daemon off;"]
-
-
-
-
-
