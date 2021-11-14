@@ -1,5 +1,12 @@
 version: "3.3"
 services:
-    image: centos:centos7.9.2009
+    image: funnyzak/nginx
+    container_name: nginx
+    environment:
+      - TZ=Asia/Shanghai
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/conf.d:/etc/nginx/conf.d
+    restart: always
     ports:
-      - "1002:80"
+      - "1688:80"
