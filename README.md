@@ -97,3 +97,10 @@ services:
 ```
 
 Now, running `docker-compose up -d` will run the application for you.
+
+
+## Reference
+
+- [MaxMind (GeoIp Data)](https://www.maxmind.com/en/accounts/288367/geoip/downloads)
+- [Nginx Book](https://ericrap.notion.site/Nginx-1c32ea493c134c36977d8fbd14226079)
+- [Nginx Help](https://docs.nginx.com/)
