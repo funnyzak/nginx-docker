@@ -87,9 +87,9 @@ RUN mkdir -p /var/log/nginx && mkdir -p /var/cache/nginx && \
       --with-openssl-opt=no-nextprotoneg \
       --with-debug && \
       make && make install && \
-      ln -s /usr/lib64/nginx/modules /etc/nginx/modules && \
-      useradd --system --home /var/cache/nginx --shell /sbin/nologin --comment "nginx user" --user-group nginx && \
-      rm -rf /mnt/tmp
+      ln -s /usr/lib64/nginx/modules /etc/nginx/modules 
+
+RUN useradd --system --home /var/cache/nginx --shell /sbin/nologin --comment "nginx user" --user-group nginx 
 
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY conf.d /etc/nginx
@@ -103,5 +103,3 @@ WORKDIR /usr/sbin/
 EXPOSE 80 443
 
 CMD ["/usr/sbin/nginx","-g","daemon off;"]
-
-
