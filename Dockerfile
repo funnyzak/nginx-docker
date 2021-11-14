@@ -1,4 +1,4 @@
-FROM centos:centos7.9.2009 AS builder
+FROM centos:centos7 AS build
 
 # build nginx version eg: 1.21.4
 ARG NGINX_VERSION
@@ -10,7 +10,6 @@ ARG TMP_DIR=/mnt/tmp
 ARG NGINX_SOURCE=${TMP_DIR}/nginx-${NGINX_VERSION}
 
 RUN set -x && \
-  timedatectl set-timezone 'Asia/Shanghai' && \
   yum update -y && \
   yum install -y gcc \
   wget tree man \
@@ -91,7 +90,7 @@ RUN mkdir -p /var/log/nginx && mkdir -p /var/cache/nginx && \
     --with-openssl-opt=no-nextprotoneg \
     --with-debug && make && make install && \
     ln -s /usr/lib64/nginx/modules /etc/nginx/modules && \
-    rm -rf &{TMP_DIR}
+    rm -rf ${TMP_DIR}
 
 RUN useradd --system --home /var/cache/nginx --shell /sbin/nologin --comment "nginx user" --user-group nginx 
 
