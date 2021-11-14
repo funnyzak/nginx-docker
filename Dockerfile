@@ -1,4 +1,4 @@
-FROM centos:centos7 AS build
+FROM centos:centos7 AS builder
 
 # build nginx version eg: 1.21.4
 ARG NGINX_VERSION
@@ -19,7 +19,7 @@ RUN set -x && \
   gd gd-devel \
   perl perl-devel perl-ExtUtils-Embed \
   libxslt libxslt-devel libxml2 libxml2-devel \
-  GeoIP GeoIP-devel \
+  GeoIP GeoIP-devel && \
   yum groupinstall -y 'Development Tools'
 
 
@@ -87,24 +87,43 @@ RUN mkdir -p /var/log/nginx && mkdir -p /var/cache/nginx && \
     --with-stream_ssl_preread_module \
     --with-compat \
     --with-pcre-jit \
-    --with-openssl-opt=no-nextprotoneg \
-    --with-debug && make && make install && \
+    --with-openssl-opt=no-nextprotoneg && \
+    make && make install && \
     ln -s /usr/lib64/nginx/modules /etc/nginx/modules && \
     rm -rf ${TMP_DIR}
 
-RUN useradd --system --home /var/cache/nginx --shell /sbin/nologin --comment "nginx user" --user-group nginx 
 
+
+FROM centos:centos7
+
+COPY --from=builder /var/log /var/log
+COPY --from=builder /usr/sbin/nginx /usr/sbin/nginx
+COPY --from=builder /usr/lib64/nginx/modules /usr/lib64/nginx/modules
+COPY --from=builder /var/cache/nginx /var/cache/nginx
+COPY --from=builder /etc/nginx /etc/nginx
 COPY nginx.conf /etc/nginx/nginx.conf
-COPY conf.d /etc/nginx
+COPY conf.d /etc/nginx/conf.d
 
-RUN set -x \
-  && ln -sf /dev/stdout /var/log/nginx/access.log \ 
-  && ln -sf /dev/stderr /var/log/nginx/error.log 
+RUN set -x && \ 
+  yum update -y && \
+  yum install -y pcre pcre-devel \
+  zlib zlib-devel \
+  openssl openssl-devel \
+  gd gd-devel \
+  perl perl-devel perl-ExtUtils-Embed \
+  libxslt libxslt-devel libxml2 libxml2-devel \
+  GeoIP GeoIP-devel && \
+  useradd --system --home /var/cache/nginx --shell /sbin/nologin --comment "nginx user" --user-group nginx && \
+  ln -sf /dev/stdout /var/log/nginx/access.log && \ 
+  ln -sf /dev/stderr /var/log/nginx/error.log 
 
 WORKDIR /usr/sbin/
 
 EXPOSE 80 443
 
 CMD ["/usr/sbin/nginx","-g","daemon off;"]
+
+
+
 
 

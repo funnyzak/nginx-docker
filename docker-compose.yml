@@ -1,5 +1,6 @@
 version: "3.3"
 services:
+  nginx:
     image: funnyzak/nginx
     container_name: nginx
     environment:
@@ -9,4 +10,4 @@ services:
       - ./nginx/conf.d:/etc/nginx/conf.d
     restart: always
     ports:
-      - "1688:80"
+      - "1688:80" 
