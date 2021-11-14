@@ -1,0 +1,5 @@
+version: "3.3"
+services:
+    image: centos:centos7.9.2009
+    ports:
+      - "1002:80"
