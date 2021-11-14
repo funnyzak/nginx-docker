@@ -9,16 +9,18 @@ ARG TMP_DIR=/mnt/tmp
 # nginx source extract dir
 ARG NGINX_SOURCE=${TMP_DIR}/nginx-${NGINX_VERSION}
 
-RUN set -x \
-  && timedatectl set-timezone 'Asia/Shanghai'
-  && yum update -y
-  && yum install -y gcc \
+RUN set -x && \
+  timedatectl set-timezone 'Asia/Shanghai' && \
+  yum update -y && \
+  yum install -y gcc \
   wget tree man \
   pcre pcre-devel \
   zlib zlib-devel \
   openssl openssl-devel \
   gd gd-devel \
-  perl perl-devel perl-ExtUtils-Embed libxslt libxslt-devel libxml2 libxml2-devel GeoIP GeoIP-devel \
+  perl perl-devel perl-ExtUtils-Embed \
+  libxslt libxslt-devel libxml2 libxml2-devel \
+  GeoIP GeoIP-devel \
   yum groupinstall -y 'Development Tools'
 
 
@@ -88,7 +90,8 @@ RUN mkdir -p /var/log/nginx && mkdir -p /var/cache/nginx && \
     --with-pcre-jit \
     --with-openssl-opt=no-nextprotoneg \
     --with-debug && make && make install && \
-    ln -s /usr/lib64/nginx/modules /etc/nginx/modules 
+    ln -s /usr/lib64/nginx/modules /etc/nginx/modules && \
+    rm -rf &{TMP_DIR}
 
 RUN useradd --system --home /var/cache/nginx --shell /sbin/nologin --comment "nginx user" --user-group nginx 
 
