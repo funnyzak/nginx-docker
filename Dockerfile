@@ -10,7 +10,9 @@ ARG TMP_DIR=/mnt/tmp
 ARG NGINX_SOURCE=${TMP_DIR}/nginx-${NGINX_VERSION}
 
 RUN set -x \
-  && yum install -y  gcc \
+  && timedatectl set-timezone 'Asia/Shanghai'
+  && yum update -y
+  && yum install -y gcc \
   wget tree man \
   pcre pcre-devel \
   zlib zlib-devel \
