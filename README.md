@@ -1,19 +1,11 @@
 # Nginx Docker
 
+nginx with multiple modules.
+
 [![Docker Stars](https://img.shields.io/docker/stars/funnyzak/nginx.svg?style=flat-square)](https://hub.docker.com/r/funnyzak/nginx/)
 [![Docker Pulls](https://img.shields.io/docker/pulls/funnyzak/nginx.svg?style=flat-square)](https://hub.docker.com/r/funnyzak/nginx/)
 
-## Build
-
-```
-# docker: funnyzak:nginx:1.21.4
-docker build \
-—build-arg NGINX_TAG=1.21.4 \
--t funnyzak/nginx:1.21.4 .
-```
-
-
-## Modules
+ **Modules**
 
 - ngx_http_geoip_module.so
 - ngx_http_image_filter_module.so
@@ -21,14 +13,19 @@ docker build \
 - ngx_http_xslt_filter_module.so
 - ngx_mail_module.so
 - ngx_stream_geoip_module.so
-- ngx_stream_module.
+- ngx_stream_module.so
+- 
+## Build
 
+```
+# docker: funnyzak:nginx:1.21.4
+docker build -—build-arg NGINX_TAG=1.21.4 -t funnyzak/nginx:1.21.4 .
+```
 ## Usage
 
 ```
-$ docker run —name nginx —expose 80  -it funnyzak/nginx
+docker run -d -t -i --name nginx --restart always --privileged=true -p 81:80 funnyzak/nginx
 ```
- 
 ## Conf
  
 ###  Nginx.conf

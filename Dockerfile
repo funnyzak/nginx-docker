@@ -96,6 +96,14 @@ RUN mkdir -p /var/log/nginx && mkdir -p /var/cache/nginx && \
 
 FROM centos:centos7
 
+LABEL org.label-schema.vendor="potato<silenceace@gmail.com>" \
+  org.label-schema.name="nginx" \
+  org.label-schema.description="nginx with multiple modules" \
+  org.label-schema.url="https://yycc.me" \
+  org.label-schema.schema-version="1.0"	\
+  org.label-schema.vcs-type="Git" \
+  org.label-schema.vcs-url="https://github.com/funnyzak/nginx-docker" 
+
 COPY --from=builder /var/log /var/log
 COPY --from=builder /usr/sbin/nginx /usr/sbin/nginx
 COPY --from=builder /usr/lib64/nginx/modules /usr/lib64/nginx/modules
