@@ -1,47 +1,40 @@
-FROM centos:centos7 AS builder
+FROM funnyzak/alpine-glibc:latest
+
+MAINTAINER Leon <silenceace@gmail.com>
 
 ARG BUILD_DATE
 ARG VCS_REF
-# build nginx version eg: 1.21.4
-ARG VERSION 1.21.4
-# nginx source extract dir
-ARG NGINX_SOURCE=${TMP_DIR}/nginx-${VERSION}
+ARG VERSION=1.23.3
 
-
+ENV NGINX_VERSION=nginx-${VERSION}
 ENV TZ Asia/Shanghai
-ENV LC_ALL C.UTF-8
-ENV LANG=C.UTF-8
 
-# temp dir
-ENV TMP_DIR=/mnt/tmp
+ENV TMP_PATH=/tmp
+ENV HEADERS_MORE_NGINX_MODULE=0.34
+# install nginx dependencies
+RUN apk --update add openssl-dev pcre-dev zlib-dev wget build-base \
+    gd gd-dev \
+    perl perl-dev \
+    libxslt libxslt-dev libxml2 libxml2-dev geoip geoip-dev
 
-RUN set -x && \
-  yum update -y && \
-  yum install -y gcc \
-  wget tree man \
-  pcre pcre-devel \
-  zlib zlib-devel \
-  openssl openssl-devel \
-  gd gd-devel \
-  perl perl-devel perl-ExtUtils-Embed \
-  libxslt libxslt-devel libxml2 libxml2-devel \
-  GeoIP GeoIP-devel && \
-  yum groupinstall -y 'Development Tools'
+# download nginx source
+RUN mkdir -p ${TMP_PATH} && \
+    wget http://nginx.org/download/${NGINX_VERSION}.tar.gz -O ${TMP_PATH}/${NGINX_VERSION}.tar.gz
 
-RUN mkdir -p ${TMP_DIR} 
-# Download sources
-RUN wget "http://nginx.org/download/nginx-${VERSION}.tar.gz" -O ${TMP_DIR}/nginx.tar.gz
+# download headers-more-nginx-module from github
+RUN cd ${TMP_PATH} && \
+    wget https://github.com/openresty/headers-more-nginx-module/archive/v${HEADERS_MORE_NGINX_MODULE}.tar.gz -O headers-more-nginx-module.tar.gz && \
+    tar -zxvf headers-more-nginx-module.tar.gz \
+    && mv headers-more-nginx-module-${HEADERS_MORE_NGINX_MODULE} headers-more-nginx-module
 
-# extract nginx package 
-RUN tar -zxC ${TMP_DIR} -f ${TMP_DIR}/nginx.tar.gz
+# create nginx user
+RUN addgroup -S nginx && adduser -D -S -h /var/cache/nginx -s /sbin/nologin -G nginx nginx
 
-# compiler nginx source
-RUN mkdir -p /var/log/nginx && mkdir -p /var/cache/nginx && \
-  cd ${NGINX_SOURCE} && \
-  # cp man/nginx.8 /usr/share/man/man8 \
-  # gzip /usr/share/man/man8/nginx.8 \
-  # ls /usr/share/man/man8/ | grep nginx.8.gz \
-  ./configure --prefix=/etc/nginx \
+# make nginx source
+RUN cd ${TMP_PATH} && \
+    tar -zxvf ${NGINX_VERSION}.tar.gz && \
+    cd ${TMP_PATH}/${NGINX_VERSION} && \
+    ./configure --prefix=/etc/nginx \
     --sbin-path=/usr/sbin/nginx \
     --modules-path=/usr/lib64/nginx/modules \
     --conf-path=/etc/nginx/nginx.conf \
@@ -50,11 +43,11 @@ RUN mkdir -p /var/log/nginx && mkdir -p /var/cache/nginx && \
     --lock-path=/var/run/nginx.lock \
     --user=nginx \
     --group=nginx \
-    --build=CentOS \
+    --build=Alpine \
+    --add-module=${TMP_PATH}/headers-more-nginx-module \
     --with-select_module \
     --with-poll_module \
     --with-threads \
-    --with-file-aio \
     --with-http_ssl_module \
     --with-http_v2_module \
     --with-http_realip_module \
@@ -95,41 +88,22 @@ RUN mkdir -p /var/log/nginx && mkdir -p /var/cache/nginx && \
     --with-openssl-opt=no-nextprotoneg && \
     make && make install && \
     ln -s /usr/lib64/nginx/modules /etc/nginx/modules && \
-    rm -rf ${TMP_DIR}
+    apk del build-base && \
+    rm -rf ${TMP_PATH} && \
+    rm -rf /var/cache/apk/*
 
-FROM centos:centos7
+# Copy custom Nginx configuration files to the container
+COPY conf/nginx.conf /etc/nginx/nginx.conf
+COPY conf/conf.d /etc/nginx/conf.d
 
-LABEL org.label-schema.vendor="potato<silenceace@gmail.com>" \
-  org.label-schema.name="nginx" \
-  org.label-schema.description="nginx with multiple modules" \
-  org.label-schema.url="https://yycc.me" \
-  org.label-schema.schema-version="1.0"	\
-  org.label-schema.vcs-type="Git" \
-  org.label-schema.vcs-url="https://github.com/funnyzak/nginx-docker" 
+# forward request and error logs to docker log collector
+RUN ln -sf /dev/stdout /var/log/nginx/access.log
+RUN ln -sf /dev/stderr /var/log/nginx/error.log
 
-COPY --from=builder /var/log /var/log
-COPY --from=builder /usr/sbin/nginx /usr/sbin/nginx
-COPY --from=builder /usr/lib64/nginx/modules /usr/lib64/nginx/modules
-COPY --from=builder /var/cache/nginx /var/cache/nginx
-COPY --from=builder /etc/nginx /etc/nginx
-COPY nginx.conf /etc/nginx/nginx.conf
-COPY conf.d /etc/nginx/conf.d
+VOLUME ["/var/log/nginx"]
 
-RUN set -x && \ 
-  yum update -y && \
-  yum install -y pcre pcre-devel \
-  zlib zlib-devel \
-  openssl openssl-devel \
-  gd gd-devel \
-  perl perl-devel perl-ExtUtils-Embed \
-  libxslt libxslt-devel libxml2 libxml2-devel \
-  GeoIP GeoIP-devel && \
-  useradd --system --home /var/cache/nginx --shell /sbin/nologin --comment "nginx user" --user-group nginx && \
-  ln -sf /dev/stdout /var/log/nginx/access.log && \ 
-  ln -sf /dev/stderr /var/log/nginx/error.log 
-
-WORKDIR /usr/sbin/
+WORKDIR /etc/nginx
 
 EXPOSE 80 443
 
-CMD ["/usr/sbin/nginx","-g","daemon off;"]
+CMD ["/usr/sbin/nginx", "-g", "daemon off;"]
