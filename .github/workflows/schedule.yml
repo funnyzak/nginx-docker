@@ -2,6 +2,7 @@ name: Nginx Version Check and Docker Image Build
 on:
   schedule:
     - cron: '0 0 * * *' # run every day at midnight
+  workflow_dispatch:
 env:
   IMAGE_REPOSITORY: funnyzak/nginx
 
