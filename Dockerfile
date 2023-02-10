@@ -1,13 +1,19 @@
 FROM centos:centos7 AS builder
 
+ARG BUILD_DATE
+ARG VCS_REF
 # build nginx version eg: 1.21.4
-ARG NGINX_VERSION
+ARG VERSION 1.21.4
+# nginx source extract dir
+ARG NGINX_SOURCE=${TMP_DIR}/nginx-${VERSION}
+
+
+ENV TZ Asia/Shanghai
+ENV LC_ALL C.UTF-8
+ENV LANG=C.UTF-8
 
 # temp dir
-ARG TMP_DIR=/mnt/tmp
-
-# nginx source extract dir
-ARG NGINX_SOURCE=${TMP_DIR}/nginx-${NGINX_VERSION}
+ENV TMP_DIR=/mnt/tmp
 
 RUN set -x && \
   yum update -y && \
@@ -24,7 +30,7 @@ RUN set -x && \
 
 RUN mkdir -p ${TMP_DIR} 
 # Download sources
-RUN wget "http://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz" -O ${TMP_DIR}/nginx.tar.gz
+RUN wget "http://nginx.org/download/nginx-${VERSION}.tar.gz" -O ${TMP_DIR}/nginx.tar.gz
 
 # extract nginx package 
 RUN tar -zxC ${TMP_DIR} -f ${TMP_DIR}/nginx.tar.gz
