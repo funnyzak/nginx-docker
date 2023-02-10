@@ -1,14 +1,7 @@
-name: release
+name: Nginx Version Check and Docker Image Build
 on:
-  push:
-    tags:
-      - "*"
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'docker image version, default is git tag'
-        required: false
-        default: 'latest'
+  schedule:
+    - cron: '0 0 * * *' # run every day at midnight
 env:
   IMAGE_REPOSITORY: funnyzak/nginx
 
@@ -20,6 +13,16 @@ jobs:
       - name: Check latest Nginx version
         run: |
           curl -s https://nginx.org/en/download.html | grep -o 'nginx-[0-9.]\+.tar.gz' | head -1 | sed 's/nginx-//' | sed 's/.tar.gz//' > version.txt
+      - name: Check latest image version
+        run: |
+          curl -s https://hub.docker.com/v2/repositories/funnyzak/nginx/tags | jq -r '.results[].name' | sort -V | tail -1 > image_version.txt
+      - name: Compare version
+        run: |
+          if [ $(cat version.txt) == $(cat image_version.txt) ]; then
+            echo "No new version, exit"
+            exit 0
+          fi
+
   docker-release:
     name: Publish Docker images
     needs: [nginx-latest]
@@ -32,25 +35,11 @@ jobs:
         uses: docker/setup-buildx-action@v2
       - name: Set variables
         run: |
-          echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
-          echo "BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_ENV
-      - name: Get version from input 
-        if: ${{ github.event.inputs.version != '' }}
-        run: |
-          echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+          echo "BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_ENV    
       - name: Get version from nginx official
         if: ${{ env.VERSION == '' || env.VERSION == 'latest' }}
         run: |
           echo "VERSION=$(cat version.txt)" >> $GITHUB_ENV
-      - name: Build changelog
-        id: build_changelog
-        if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
-        uses: mikepenz/release-changelog-builder-action@v3.6.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          configuration: '.github/config/changelog_configuration.json'
-          ignorePreReleases: 'false'
       - name: Print variables
         run: |
           echo "VERSION=${{ env.VERSION }}"
@@ -74,13 +63,13 @@ jobs:
             ${{ env.IMAGE_REPOSITORY }}:latest
           platforms: |
             linux/amd64
-      - name: Github release
-        uses: softprops/action-gh-release@v1
-        if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
-        with:
-          body: ${{steps.build_changelog.outputs.changelog}}
-        env:
-          GITHUB_TOKEN: ${{ secrets.github_token }}
+      - name: Commit tag and push
+        if: ${{ env.VERSION != 'latest' }}
+        run: |
+          git config --global user.name "Leon"
+          git config --global user.email "${{ secrets.GITHUB_EMAIL }}"
+          git tag -f -a ${{ env.VERSION }} -m "Release ${{ env.VERSION }}"
+          git push origin ${{ env.VERSION }}
   push-message:
       name: Push message
       runs-on: ubuntu-latest
