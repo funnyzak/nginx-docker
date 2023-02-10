@@ -17,9 +17,10 @@ jobs:
     name: Nginx Version Check and Docker Image Build
     runs-on: ubuntu-latest
     steps:
-      - name: Check latest Nginx version
+      - name: Latest Nginx version
+        id: nginx-version
         run: |
-          curl -s https://nginx.org/en/download.html | grep -o 'nginx-[0-9.]\+.tar.gz' | head -1 | sed 's/nginx-//' | sed 's/.tar.gz//' > version.txt
+          echo "VERSION=$(curl -s https://nginx.org/en/download.html | grep -o 'nginx-[0-9.]\+.tar.gz' | head -1 | sed 's/nginx-//' | sed 's/.tar.gz//')" >> $GITHUB_ENV
   docker-release:
     name: Publish Docker images
     needs: [nginx-latest]
@@ -41,7 +42,7 @@ jobs:
       - name: Get version from nginx official
         if: ${{ env.VERSION == '' || env.VERSION == 'latest' }}
         run: |
-          echo "VERSION=$(cat version.txt)" >> $GITHUB_ENV
+          echo "VERSION=${{ needs.nginx-latest.outputs.VERSION }}" >> $GITHUB_ENV
       - name: Build changelog
         id: build_changelog
         if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}

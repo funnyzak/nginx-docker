@@ -7,26 +7,28 @@ env:
   IMAGE_REPOSITORY: funnyzak/nginx
 
 jobs:
-  nginx-latest:
+  compare-version:
     name: Nginx Version Check and Docker Image Build
     runs-on: ubuntu-latest
     steps:
-      - name: Check latest Nginx version
+      - name: Latest Nginx version
+        id: nginx-version
         run: |
-          curl -s https://nginx.org/en/download.html | grep -o 'nginx-[0-9.]\+.tar.gz' | head -1 | sed 's/nginx-//' | sed 's/.tar.gz//' > version.txt
-      - name: Check latest image version
+          echo "VERSION=$(curl -s https://nginx.org/en/download.html | grep -o 'nginx-[0-9.]\+.tar.gz' | head -1 | sed 's/nginx-//' | sed 's/.tar.gz//')" >> $GITHUB_ENV
+      - name:  Latest image version
+        id: image-version
         run: |
-          curl -s https://hub.docker.com/v2/repositories/funnyzak/nginx/tags | jq -r '.results[].name' | sort -V | tail -1 > image_version.txt
+          echo "IMAGE_VERSION=$(curl -s https://hub.docker.com/v2/repositories/${{ env.IMAGE_REPOSITORY }}/tags/?page_size=1 | jq -r '.results[0].name')" >> $GITHUB_ENV
       - name: Compare version
         run: |
-          if [ $(cat version.txt) == $(cat image_version.txt) ]; then
-            echo "No new version, exit"
+          if [ "${{ steps.image-version.outputs.IMAGE_VERSION }}" == "${{ steps.nginx-version.outputs.VERSION }}" ]; then
+            echo "No new version"
             exit 0
           fi
 
   docker-release:
     name: Publish Docker images
-    needs: [nginx-latest]
+    needs: [compare-version]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -40,7 +42,7 @@ jobs:
       - name: Get version from nginx official
         if: ${{ env.VERSION == '' || env.VERSION == 'latest' }}
         run: |
-          echo "VERSION=$(cat version.txt)" >> $GITHUB_ENV
+          echo "VERSION=${{ needs.compare-version.outputs.VERSION }}" >> $GITHUB_ENV
       - name: Print variables
         run: |
           echo "VERSION=${{ env.VERSION }}"
