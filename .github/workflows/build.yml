@@ -30,6 +30,10 @@ jobs:
         if: ${{ github.event.inputs.version != '' }}
         run: |
           echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+      - name: Get version from nginx official
+        if: ${{ env.VERSION == '' || env.VERSION == 'latest' }}
+        run: |
+          echo "VERSION=$(curl -s https://nginx.org/en/download.html | grep -oP 'nginx-\K[0-9.]+(?=</a>)' | head -n 1)" >> $GITHUB_ENV
       - name: Build changelog
         id: build_changelog
         if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
