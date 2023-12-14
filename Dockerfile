@@ -7,10 +7,11 @@ ARG VERSION=1.23.3
 ENV NGINX_VERSION=nginx-${VERSION}
 ENV TZ Asia/Shanghai
 
-ENV TMP_PATH=/tmp
+ENV TMP_PATH=/mnt/tmp
 ENV HEADERS_MORE_NGINX_MODULE=0.36
+ENV FANCY_INDEX=0.5.2
 # install nginx dependencies
-RUN apk --update add openssl-dev pcre-dev zlib-dev wget build-base \
+RUN apk --update add wget openssl-dev pcre-dev zlib-dev build-base \
     gd gd-dev \
     perl perl-dev \
     libxslt libxslt-dev libxml2 libxml2-dev geoip geoip-dev
@@ -24,6 +25,12 @@ RUN cd ${TMP_PATH} && \
     wget https://github.com/openresty/headers-more-nginx-module/archive/v${HEADERS_MORE_NGINX_MODULE}.tar.gz -O headers-more-nginx-module.tar.gz && \
     tar -zxvf headers-more-nginx-module.tar.gz \
     && mv headers-more-nginx-module-${HEADERS_MORE_NGINX_MODULE} headers-more-nginx-module
+
+# download ngx-fancyindex from github
+RUN cd ${TMP_PATH} && \
+    wget http://github.com/aperezdc/ngx-fancyindex/archive/v${FANCY_INDEX}.tar.gz -O ngx-fancyindex.tar.gz && \
+    tar -zxvf ngx-fancyindex.tar.gz \
+    && mv ngx-fancyindex-${FANCY_INDEX} ngx-fancyindex
 
 # create nginx user
 RUN addgroup -S nginx && adduser -D -S -h /var/cache/nginx -s /sbin/nologin -G nginx nginx
@@ -43,6 +50,7 @@ RUN cd ${TMP_PATH} && \
     --group=nginx \
     --build=Alpine \
     --add-module=${TMP_PATH}/headers-more-nginx-module \
+    --add-module=${TMP_PATH}/ngx-fancyindex \
     --with-select_module \
     --with-poll_module \
     --with-threads \

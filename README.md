@@ -25,6 +25,7 @@ Download size of this image is:
 - ngx_mail_module.so
 - ngx_stream_geoip_module.so
 - ngx_stream_module.so
+- [ngx-fancyindex](https://github.com/aperezdc/ngx-fancyindex)
 - [headers-more-nginx-module](https://github.com/openresty/headers-more-nginx-module)
 - ...
 
