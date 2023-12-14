@@ -18,14 +18,14 @@ Download size of this image is:
 
 ## Installed Modules
 
-- ngx_http_geoip_module.so
-- ngx_http_image_filter_module.so
+- [ngx_http_geoip_module.so](https://nginx.org/en/docs/http/ngx_http_geoip_module.html)
+- [ngx_http_image_filter_module.so](https://nginx.org/en/docs/http/ngx_http_image_filter_module.html)
 - ngx_http_perl_module.so
 - ngx_http_xslt_filter_module.so
 - ngx_mail_module.so
 - ngx_stream_geoip_module.so
 - ngx_stream_module.so
-- headers-more-nginx-module
+- [headers-more-nginx-module](https://github.com/openresty/headers-more-nginx-module)
 - ...
 
 More modules can be found in [Dockerfile](https://github.com/funnyzak/nginx-docker/blob/main/Dockerfile).
@@ -77,8 +77,9 @@ docker build \
 ```
 
 ## Conf Configuration
-###  Nginx.conf
- 
+
+### Nginx.conf
+
 ```conf
 load_module /usr/lib64/nginx/modules/ngx_http_image_filter_module.so;
 load_module /usr/lib64/nginx/modules/ngx_stream_module.so;

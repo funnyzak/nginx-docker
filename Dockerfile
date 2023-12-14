@@ -1,7 +1,5 @@
 FROM funnyzak/alpine-glibc:latest
 
-MAINTAINER Leon <silenceace@gmail.com>
-
 ARG BUILD_DATE
 ARG VCS_REF
 ARG VERSION=1.23.3
@@ -10,7 +8,7 @@ ENV NGINX_VERSION=nginx-${VERSION}
 ENV TZ Asia/Shanghai
 
 ENV TMP_PATH=/tmp
-ENV HEADERS_MORE_NGINX_MODULE=0.34
+ENV HEADERS_MORE_NGINX_MODULE=0.36
 # install nginx dependencies
 RUN apk --update add openssl-dev pcre-dev zlib-dev wget build-base \
     gd gd-dev \
