@@ -103,11 +103,11 @@ COPY conf/nginx.conf /etc/nginx/nginx.conf
 COPY conf/conf.d /etc/nginx/conf.d
 
 # forward request and error logs to docker log collector
-RUN ln -sf /dev/stdout /var/log/nginx/access.log
-RUN ln -sf /dev/stderr /var/log/nginx/error.log
+RUN ln -sf /dev/stdout /var/log/nginx/access.log && \
+    ln -sf /dev/stderr /var/log/nginx/error.log
 
 WORKDIR /etc/nginx
 
 EXPOSE 80 443
 
-CMD ["/usr/sbin/nginx", "-g", "daemon off;"]
+CMD /bin/sh -c "nginx && tail -f /var/log/nginx/*.log"
