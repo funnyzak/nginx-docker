@@ -106,8 +106,6 @@ COPY conf/conf.d /etc/nginx/conf.d
 RUN ln -sf /dev/stdout /var/log/nginx/access.log
 RUN ln -sf /dev/stderr /var/log/nginx/error.log
 
-VOLUME ["/var/log/nginx"]
-
 WORKDIR /etc/nginx
 
 EXPOSE 80 443
