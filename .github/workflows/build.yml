@@ -70,6 +70,8 @@ jobs:
           tags: |
             ${{ env.IMAGE_REPOSITORY }}:${{ env.VERSION }}
             ${{ env.IMAGE_REPOSITORY }}:latest
+            registry.cn-beijing.aliyuncs.com/${{ env.IMAGE_REPOSITORY }}:${{ env.VERSION }}
+            registry.cn-beijing.aliyuncs.com/${{ env.IMAGE_REPOSITORY }}:latest
           platforms: |
             linux/amd64
       - name: Github release
