@@ -57,7 +57,7 @@ jobs:
         with:
           registry: registry.cn-beijing.aliyuncs.com
           username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          password: ${{ secrets.DOCKER_ALIYUNCS_PASSWORD }}
       - name: Docker build and push
         uses: docker/build-push-action@v3
         with:
