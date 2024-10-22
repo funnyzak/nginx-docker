@@ -16,6 +16,8 @@ Download size of this image is:
 
 **Docker Pull Command**: `docker pull funnyzak/nginx:latest`
 
+**China Mirror**: `docker pull registry.cn-beijing.aliyuncs.com/funnyzak/nginx:latest`
+
 ## Installed Modules
 
 - [ngx_http_geoip_module.so](https://nginx.org/en/docs/http/ngx_http_geoip_module.html)
