@@ -6,6 +6,13 @@
 [![GitHub release (latest by date)][latest-release]][repository-url]
 [![GitHub][license-image]][repository-url]
 
+> This repository is no longer maintained. The latest built images can be found in the [Docker Release](https://github.com/funnyzak/docker-release/tree/main/Docker/nginx).
+
+> 此仓库已不在维护，最新构建的镜像请查看 [Docker Release](https://github.com/funnyzak/docker-release/tree/main/Docker/nginx) 。
+
+
+
+
 A nginx docker image with some useful modules.
 
 Download size of this image is:
